@@ -2,10 +2,13 @@
   <div>
     <div class="snotify-backdrop" v-if="backdrop >= 0" :style="{opacity: backdrop}"></div>
     <div v-for="(position, index) in notifications" class="snotify" :class="'snotify-' + index">
-      <toast v-for="toast in notifications[index].slice(blockSize_a, blockSize_b)" :toastData="toast" :key="toast.id" @stateChanged="stateChanged" />
+      <slot name="toast"
+            v-for="toast in notifications[index].slice(blockSize_a, blockSize_b)"
+            :snotify="{stateChanged: stateChanged, toast:toast}">
+        <toast :toastData="toast" :key="toast.id" @stateChanged="stateChanged" />
+      </slot>
     </div>
   </div>
-
 </template>
 
 <script lang="ts">
