@@ -11,21 +11,42 @@
             '-webkit-transition': toast.config.animation.time + 'ms',
             transition: toast.config.animation.time + 'ms'
           }"
-    @click="onClick" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave" @animationend="onExitTransitionEnd">
-    <div class="snotifyToast__progressBar" v-if="toast.config.showProgressBar && toast.config.timeout > 0">
-      <span class="snotifyToast__progressBar__percentage" :style="{'width': (state.progress * 100) + '%'}"></span>
-    </div>
-    <div class="snotifyToast__inner" v-if="!toast.config.html" :class="{'snotifyToast__noIcon': toast.config.icon === false}">
-      <div class="snotifyToast__title" v-if="toast.title">{{toast.title | truncate(toast.config.titleMaxLength)}}</div>
-      <div class="snotifyToast__body" v-if="toast.body">{{toast.body | truncate(toast.config.bodyMaxLength)}}</div>
-      <snotify-prompt v-if="toast.config.type === state.promptType" :toast="toast"/>
-      <div v-if="typeof toast.config.icon === 'undefined'" :class="['snotify-icon', 'snotify-icon--' + toast.config.type]"></div>
-      <div v-else-if="toast.config.icon !== false">
-        <img class="snotify-icon" :src='toast.config.icon'/>
+    @click="onClick"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
+    @animationend="onExitTransitionEnd">
+
+    <slot name="progressBar" v-if="toast.config.showProgressBar && toast.config.timeout > 0" :state="state">
+      <div class="snotifyToast__progressBar">
+        <span class="snotifyToast__progressBar__percentage" :style="{'width': (state.progress * 100) + '%'}"></span>
       </div>
+    </slot>
+
+    <div class="snotifyToast__inner" v-if="!toast.config.html">
+      <slot name="inner" :toast="toast">
+        <slot name="title" :toast="toast" v-if="toast.title">
+          <div class="snotifyToast__title">{{toast.title | truncate(toast.config.titleMaxLength)}}</div>
+        </slot>
+        <slot name="body" :toast="toast" v-if="toast.body">
+          <div class="snotifyToast__body">{{toast.body | truncate(toast.config.bodyMaxLength)}}</div>
+        </slot>
+        <slot name="prompt" :toast="toast" v-if="toast.config.type === state.promptType">
+          <snotify-prompt :toast="toast">
+          </snotify-prompt>
+        </slot>
+        <slot name="icon" :toast="toast">
+          <div v-if="!toast.config.icon" :class="['snotify-icon', 'snotify-icon--' + toast.config.type]"></div>
+          <div v-else>
+            <img class="snotify-icon" :src='toast.config.icon'/>
+          </div>
+        </slot>
+      </slot>
     </div>
     <div class="snotifyToast__inner" v-html="toast.config.html" v-else></div>
-    <snotify-button v-if="toast.config.buttons" :toast="toast" />
+
+    <slot name="buttons" :toast="toast" v-if="toast.config.buttons">
+      <snotify-button v-if="toast.config.buttons" :toast="toast"></snotify-button>
+    </slot>
   </div>
 
 </template>
