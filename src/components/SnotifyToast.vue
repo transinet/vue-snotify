@@ -16,39 +16,33 @@
     @mouseleave="onMouseLeave"
     @animationend="onExitTransitionEnd">
 
-    <slot name="progressBar" v-if="toast.config.showProgressBar && toast.config.timeout > 0" :state="state">
-      <div class="snotifyToast__progressBar">
-        <span class="snotifyToast__progressBar__percentage" :style="{'width': (state.progress * 100) + '%'}"></span>
-      </div>
-    </slot>
-
-    <div class="snotifyToast__inner" v-if="!toast.config.html">
-      <slot name="inner" :toast="toast">
-        <slot name="title" :toast="toast" v-if="toast.title">
-          <div class="snotifyToast__title">{{toast.title | truncate(toast.config.titleMaxLength)}}</div>
-        </slot>
-        <slot name="body" :toast="toast" v-if="toast.body">
-          <div class="snotifyToast__body">{{toast.body | truncate(toast.config.bodyMaxLength)}}</div>
-        </slot>
-        <slot name="prompt" :toast="toast" v-if="toast.config.type === state.promptType">
-          <snotify-prompt :toast="toast">
-          </snotify-prompt>
-        </slot>
-        <slot name="icon" :toast="toast">
-          <div v-if="!toast.config.icon" :class="['snotify-icon', 'snotify-icon--' + toast.config.type]"></div>
-          <div v-else>
-            <img class="snotify-icon" :src='toast.config.icon'/>
-          </div>
-        </slot>
-      </slot>
+    <div v-if="toast.config.showProgressBar && toast.config.timeout > 0"
+         class="snotifyToast__progressBar">
+      <span class="snotifyToast__progressBar__percentage" :style="{'width': (state.progress * 100) + '%'}" />
     </div>
-    <div class="snotifyToast__inner" v-html="toast.config.html" v-else></div>
 
-    <slot name="buttons" :toast="toast" v-if="toast.config.buttons">
-      <snotify-button v-if="toast.config.buttons" :toast="toast"></snotify-button>
-    </slot>
+    <div v-if="!toast.config.html"
+         class="snotifyToast__inner"
+         :class="{'snotifyToast__noIcon': toast.config.icon === false}">
+      <div class="snotifyToast__inner-row">
+        <div v-if="typeof toast.config.icon === 'undefined'"
+             :class="['snotify-icon', 'snotify-icon--' + toast.config.type]" />
+        <div v-else-if="toast.config.icon !== false" class="snotifyToast__icon">
+          <svg><use :xlink:href="toast.config.icon" /></svg>
+        </div>
+        <div>
+          <div v-if="toast.title" class="snotifyToast__title">
+            {{toast.title | truncate(toast.config.titleMaxLength)}}
+          </div>
+          <div v-if="toast.body" class="snotifyToast__body">
+            {{toast.body | truncate(toast.config.bodyMaxLength)}}
+          </div>
+          <snotify-prompt v-if="toast.config.type === state.promptType" :toast="toast"/>
+        </div>
+      </div>
+      <snotify-button v-if="toast.config.buttons" :toast="toast" />
+    </div>
   </div>
-
 </template>
 
 <script lang="ts">
@@ -56,6 +50,7 @@
   import SnotifyPrompt from './SnotifyPrompt.vue';
   import SnotifyButton from './SnotifyButton.vue';
   import {SnotifyStyle} from '../enums';
+import { isBoolean } from 'util';
 
   export default Vue.extend({
     props: ['toastData'],
